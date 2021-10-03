@@ -2,6 +2,7 @@
 #include <M5EPD.h>
 #include <LovyanGFX.hpp>
 #include <map>
+#include "time.h"
 #include "src/wifi_connection.hpp"
 #include "src/weather_forecast.hpp"
 
@@ -13,6 +14,11 @@ LGFX_Sprite temp_sp(&gfx);
 
 WiFiConnection wifi_connection;
 WeatherForecast weather_forecast;
+
+// 時刻設定
+const char* ntpServer = "ntp.nict.jp";
+const long  gmtOffset_sec = 3600 * 9;
+const int   daylightOffset_sec = 0;
 
 int w;
 int h;
@@ -29,11 +35,22 @@ void setupWeatherIcon(void)
   weather_icon_file_map[RAINY_AND_CLOUDY] = "/rainyandcloudy.jpeg";
 }
 
-void drawDate(const char c[])
+void drawDate(void)
 {
+  struct tm timeInfo;
+  char   timeString[30];
+
+  getLocalTime(&timeInfo);
+  sprintf(timeString,"%02d.%02d %02d:%02d"
+                  ,timeInfo.tm_mon + 1
+                  ,timeInfo.tm_mday
+                  ,timeInfo.tm_hour
+                  ,timeInfo.tm_min
+          );
+
   gfx.startWrite();
   gfx.setCursor(10, 10);
-  gfx.println(c);
+  gfx.println(timeString);
   gfx.endWrite();
   gfx.display();
 }
@@ -42,8 +59,8 @@ void setup(void)
 {
   setupWeatherIcon();
 
-  //M5.begin();
-  M5.begin(true, true, true, true, false, false);//custmized
+  M5.begin();
+//  M5.begin(true, true, true, true, false, false);//custmized
 
   M5.SHT30.Begin();
   M5.RTC.begin();
@@ -87,7 +104,8 @@ void setup(void)
 
   wifi_connection.setupWiFi();
 
-  drawDate("12.05 12:34");
+  configTime(gmtOffset_sec, daylightOffset_sec, ntpServer);
+  drawDate();
 
   if(weather_forecast.downloadWeatherForecast()){
     drawWeather();
@@ -101,7 +119,7 @@ void drawWeather(void)
 {
   int weather_enum = weather_forecast.getWeatherEnum();
   gfx.startWrite();
-  gfx.drawJpgFile(SD, weather_icon_file_map[weather_enum].c_str(), 40, 100); 
+  gfx.drawJpgFile(SD, weather_icon_file_map[weather_enum].c_str(), 40, 100);
   gfx.endWrite();
   gfx.display();
 }
@@ -109,7 +127,7 @@ void drawWeather(void)
 void drawThermometerIcon(void)
 {
   gfx.startWrite();
-  gfx.drawJpgFile(SD, "/thermometer.jpg", 470, 35); 
+  gfx.drawJpgFile(SD, "/thermometer.jpg", 470, 35);
   gfx.endWrite();
   gfx.display();
 }
@@ -117,7 +135,7 @@ void drawThermometerIcon(void)
 void drawHumidityIcon(void)
 {
   gfx.startWrite();
-  gfx.drawJpgFile(SD, "/humidity.jpg", 710, 35); 
+  gfx.drawJpgFile(SD, "/humidity.jpg", 710, 35);
   gfx.endWrite();
   gfx.display();
 }
@@ -143,7 +161,7 @@ void drawRainFallChance(void)
 {
   rfc_sp.clear(TFT_WHITE);
   rfc_sp.setTextColor(TFT_BLACK);
-  
+
   String rfc00_06 = weather_forecast.getRainFallChance00_06() + "%";
   String rfc06_12 = weather_forecast.getRainFallChance06_12() + "%";
   String rfc12_18 = weather_forecast.getRainFallChance12_18() + "%";
@@ -166,7 +184,7 @@ void drawTemperature(void)
 {
   temp_sp.clear(TFT_WHITE);
   temp_sp.setTextColor(TFT_BLACK);
-  
+
   String max_temp = weather_forecast.getMaxTemperature() + "℃";
   String min_temp = weather_forecast.getMinTemperature() + "℃";
 
@@ -187,5 +205,6 @@ void loop(void)
     M5.shutdown(5);
   }
 
-  M5.update();
+  delay(60*1000);
+  drawDate();
 }

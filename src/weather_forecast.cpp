@@ -4,8 +4,8 @@
 
 WeatherForecast::WeatherForecast(void)
 {
-    this->endpoint = "https://www.drk7.jp/weather/json/14.js";
-    this->region = "東部";
+    this->endpoint = "https://www.drk7.jp/weather/json/13.js";
+    this->region = "東京地方";
 }
 
 String WeatherForecast::createJson(String json_string)
@@ -52,7 +52,7 @@ bool WeatherForecast::downloadWeatherForecast(void)
     String today_weather = weather_info["pref"]["area"][this->region.c_str()]["info"][0];
 
     DynamicJsonDocument today_weather_info(20000);
-    deserializeJson(today_weather_info, today_weather);    
+    deserializeJson(today_weather_info, today_weather);
 
     String w = today_weather_info["weather"];
     this->weather = w;
