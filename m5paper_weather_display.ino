@@ -22,6 +22,7 @@ const int   daylightOffset_sec = 0;
 
 int w;
 int h;
+int totalDelay = 0;
 
 //weather
 std::map<int, String> weather_icon_file_map;
@@ -70,7 +71,6 @@ void setup(void)
 
   w = gfx.width();
   h = gfx.height();
-  int rectwidth = std::min(w, h) / 4;
 
   gfx.setBrightness(50);
   gfx.setEpdMode(epd_mode_t::epd_quality);  // 高品質更新、白黒反転が一瞬起きる
@@ -205,6 +205,20 @@ void loop(void)
     M5.shutdown(5);
   }
 
+  totalDelay += 60*1000;
   delay(60*1000);
   drawDate();
+
+  // １時間に１回天気情報の更新
+  if(totalDelay >= 60*60*1000) {
+    totalDelay=0;
+
+    wifi_connection.setupWiFi();
+    if(weather_forecast.downloadWeatherForecast()){
+      drawWeather();
+      drawRainFallChance();
+      drawTemperature();
+    }
+    wifi_connection.downWiFi();
+  }
 }
