@@ -11,6 +11,8 @@ LGFX_Sprite sense_temp_sp(&gfx);
 LGFX_Sprite sense_humi_sp(&gfx);
 LGFX_Sprite rfc_sp(&gfx);
 LGFX_Sprite temp_sp(&gfx);
+LGFX_Sprite tomorrow_weather_sp(&gfx);
+
 
 WiFiConnection wifi_connection;
 WeatherForecast weather_forecast;
@@ -96,6 +98,10 @@ void setup(void)
   temp_sp.createSprite(530, 100);
   temp_sp.setFont(&fonts::lgfxJapanGothic_40);
 
+  tomorrow_weather_sp.setColorDepth(4);
+  tomorrow_weather_sp.createSprite(80, 40);
+  tomorrow_weather_sp.setFont(&fonts::lgfxJapanGothic_40);
+
   delay(1000);
 
   drawThermometerIcon();
@@ -111,15 +117,38 @@ void setup(void)
     drawWeather();
     drawRainFallChance();
     drawTemperature();
+    drawTomorrow();
+    drawTomorrowWeather();
+    drawTomorrowRainFallChance();
   }
   wifi_connection.downWiFi();
 }
 
 void drawWeather(void)
 {
-  int weather_enum = weather_forecast.getWeatherEnum();
+  String weather = weather_forecast.getWeather();
+  int weather_enum = weather_forecast.getWeatherEnum(weather);
   gfx.startWrite();
   gfx.drawJpgFile(SD, weather_icon_file_map[weather_enum].c_str(), 40, 100);
+  gfx.endWrite();
+  gfx.display();
+}
+
+void drawTomorrow(void)
+{
+  tomorrow_weather_sp.clear(TFT_WHITE);
+  tomorrow_weather_sp.setTextColor(TFT_BLACK);
+  tomorrow_weather_sp.setTextSize(0.65);
+  tomorrow_weather_sp.drawString("明日", 0, 0);  
+  tomorrow_weather_sp.pushSprite(470, 365);
+}
+
+void drawTomorrowWeather(void)
+{
+  String weather = weather_forecast.getTomorrowWeather();
+  int weather_enum = weather_forecast.getWeatherEnum(weather);
+  gfx.startWrite();
+  gfx.drawJpgFile(SD, weather_icon_file_map[weather_enum].c_str(), 470, 390, 0, 0, 0, 0, 0.3);
   gfx.endWrite();
   gfx.display();
 }
@@ -178,6 +207,23 @@ void drawRainFallChance(void)
   rfc_sp.drawString(rfc12_18.c_str(), 120*2, 50);
   rfc_sp.drawString(rfc18_24.c_str(), 120*3, 50);
   rfc_sp.pushSprite(470, 160);
+}
+
+void drawTomorrowRainFallChance(void)
+{
+  rfc_sp.clear(TFT_WHITE);
+  rfc_sp.setTextColor(TFT_BLACK);
+
+  String rfc00_06 = weather_forecast.getTomorrowRainFallChance00_06() + "%";
+  String rfc06_12 = weather_forecast.getTomorrowRainFallChance06_12() + "%";
+
+  rfc_sp.setTextSize(0.8);
+  rfc_sp.drawString("00-06", 120*0, 0);
+  rfc_sp.drawString("06-12", 120*1, 0);
+  rfc_sp.setTextSize(1.3);
+  rfc_sp.drawString(rfc00_06.c_str(), 120*0, 50);
+  rfc_sp.drawString(rfc06_12.c_str(), 120*1, 50);
+  rfc_sp.pushSprite(670, 390);
 }
 
 void drawTemperature(void)

@@ -49,10 +49,13 @@ bool WeatherForecast::downloadWeatherForecast(void)
         return false;
     }
 
-    String today_weather = weather_info["pref"]["area"][this->region.c_str()]["info"][0];
+    String today_weather_str = weather_info["pref"]["area"][this->region.c_str()]["info"][0];
+    String tomorrow_weather_str = weather_info["pref"]["area"][this->region.c_str()]["info"][1];
 
     DynamicJsonDocument today_weather_info(20000);
-    deserializeJson(today_weather_info, today_weather);
+    deserializeJson(today_weather_info, today_weather_str);
+    DynamicJsonDocument tomorrow_weather_info(20000);
+    deserializeJson(tomorrow_weather_info, tomorrow_weather_str);
 
     String w = today_weather_info["weather"];
     this->weather = w;
@@ -75,14 +78,22 @@ bool WeatherForecast::downloadWeatherForecast(void)
     String rain_3 = today_weather_info["rainfallchance"]["period"][3]["content"];
     this->rain_fall_chance_18_24 = rain_3;
 
+    String tw = tomorrow_weather_info["weather"];
+    this->tomorrow_weather = tw;
+
+    String t_rain_0 = tomorrow_weather_info["rainfallchance"]["period"][0]["content"];
+    this->tomorrow_rain_fall_chance_00_06 = t_rain_0;
+
+    String t_rain_1 = tomorrow_weather_info["rainfallchance"]["period"][1]["content"];
+    this->tomorrow_rain_fall_chance_06_12 = t_rain_1;
+
     this->is_downloaded_weather = true;
 
     return true;
 }
 
-int WeatherForecast::getWeatherEnum(void)
+int WeatherForecast::getWeatherEnum(String weather)
 {
-    String w = getWeather();
     if(weather.indexOf("雨") != -1){
         if(weather.indexOf("くもり") != -1){
             return RAINY_AND_CLOUDY;

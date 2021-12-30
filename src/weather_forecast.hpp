@@ -26,21 +26,27 @@ private:
     String rain_fall_chance_06_12;
     String rain_fall_chance_12_18;
     String rain_fall_chance_18_24;
+    String tomorrow_weather;
+    String tomorrow_rain_fall_chance_00_06;
+    String tomorrow_rain_fall_chance_06_12;
 
     String createJson(String json_string);
     bool getWeatherForecast(DynamicJsonDocument &doc);
 
 public:
     WeatherForecast();
-    ~WeatherForecast() = default; 
+    ~WeatherForecast() = default;
     bool downloadWeatherForecast(void);
     bool isDownloadedWeatherForecast(void){ return is_downloaded_weather; };
     String getWeather(void){ return weather; };
-    int getWeatherEnum(void);
+    String getTomorrowWeather(void){ return tomorrow_weather; };
+    int getWeatherEnum(String weather);
     String getMaxTemperature(void){ return max_temperature; };
     String getMinTemperature(void){ return min_temperature; };
     String getRainFallChance00_06(void){ return rain_fall_chance_00_06; };
     String getRainFallChance06_12(void){ return rain_fall_chance_06_12; };
     String getRainFallChance12_18(void){ return rain_fall_chance_12_18; };
     String getRainFallChance18_24(void){ return rain_fall_chance_18_24; };
+    String getTomorrowRainFallChance00_06(void){ return tomorrow_rain_fall_chance_00_06; };
+    String getTomorrowRainFallChance06_12(void){ return tomorrow_rain_fall_chance_06_12; };
 };
