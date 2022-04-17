@@ -44,12 +44,12 @@ void drawDate(void)
   char   timeString[30];
 
   getLocalTime(&timeInfo);
-  sprintf(timeString,"%02d.%02d %02d:%02d"
-                  ,timeInfo.tm_mon + 1
-                  ,timeInfo.tm_mday
-                  ,timeInfo.tm_hour
-                  ,timeInfo.tm_min
-          );
+  sprintf(timeString, "%02d.%02d %02d:%02d"
+          , timeInfo.tm_mon + 1
+          , timeInfo.tm_mday
+          , timeInfo.tm_hour
+          , timeInfo.tm_min
+         );
 
   gfx.startWrite();
   gfx.setCursor(10, 10);
@@ -63,7 +63,7 @@ void setup(void)
   setupWeatherIcon();
 
   M5.begin();
-//  M5.begin(true, true, true, true, false, false);//custmized
+  //  M5.begin(true, true, true, true, false, false);//custmized
 
   M5.SHT30.Begin();
   M5.RTC.begin();
@@ -113,7 +113,7 @@ void setup(void)
   configTime(gmtOffset_sec, daylightOffset_sec, ntpServer);
   drawDate();
 
-  if(weather_forecast.downloadWeatherForecast()){
+  if (weather_forecast.downloadWeatherForecast()) {
     drawWeather();
     drawRainFallChance();
     drawTemperature();
@@ -139,7 +139,7 @@ void drawTomorrow(void)
   tomorrow_weather_sp.clear(TFT_WHITE);
   tomorrow_weather_sp.setTextColor(TFT_BLACK);
   tomorrow_weather_sp.setTextSize(0.65);
-  tomorrow_weather_sp.drawString("明日", 0, 0);  
+  tomorrow_weather_sp.drawString("明日", 0, 0);
   tomorrow_weather_sp.pushSprite(470, 365);
 }
 
@@ -183,7 +183,7 @@ void drawSenseTempAndHumid(void)
   sense_humi_sp.clear(TFT_WHITE);
   sense_humi_sp.setTextColor(TFT_BLACK);
   sense_humi_sp.drawNumber((int)humi, 0, 0);
-  sense_humi_sp.pushSprite(570+250, 40);
+  sense_humi_sp.pushSprite(570 + 250, 40);
 }
 
 void drawRainFallChance(void)
@@ -197,15 +197,15 @@ void drawRainFallChance(void)
   String rfc18_24 = weather_forecast.getRainFallChance18_24() + "%";
 
   rfc_sp.setTextSize(0.8);
-  rfc_sp.drawString("00-06", 120*0, 0);
-  rfc_sp.drawString("06-12", 120*1, 0);
-  rfc_sp.drawString("12-18", 120*2, 0);
-  rfc_sp.drawString("18-24", 120*3, 0);
+  rfc_sp.drawString("00-06", 120 * 0, 0);
+  rfc_sp.drawString("06-12", 120 * 1, 0);
+  rfc_sp.drawString("12-18", 120 * 2, 0);
+  rfc_sp.drawString("18-24", 120 * 3, 0);
   rfc_sp.setTextSize(1.3);
-  rfc_sp.drawString(rfc00_06.c_str(), 120*0, 50);
-  rfc_sp.drawString(rfc06_12.c_str(), 120*1, 50);
-  rfc_sp.drawString(rfc12_18.c_str(), 120*2, 50);
-  rfc_sp.drawString(rfc18_24.c_str(), 120*3, 50);
+  rfc_sp.drawString(rfc00_06.c_str(), 120 * 0, 50);
+  rfc_sp.drawString(rfc06_12.c_str(), 120 * 1, 50);
+  rfc_sp.drawString(rfc12_18.c_str(), 120 * 2, 50);
+  rfc_sp.drawString(rfc18_24.c_str(), 120 * 3, 50);
   rfc_sp.pushSprite(470, 160);
 }
 
@@ -218,11 +218,11 @@ void drawTomorrowRainFallChance(void)
   String rfc06_12 = weather_forecast.getTomorrowRainFallChance06_12() + "%";
 
   rfc_sp.setTextSize(0.8);
-  rfc_sp.drawString("00-06", 120*0, 0);
-  rfc_sp.drawString("06-12", 120*1, 0);
+  rfc_sp.drawString("00-06", 120 * 0, 0);
+  rfc_sp.drawString("06-12", 120 * 1, 0);
   rfc_sp.setTextSize(1.3);
-  rfc_sp.drawString(rfc00_06.c_str(), 120*0, 50);
-  rfc_sp.drawString(rfc06_12.c_str(), 120*1, 50);
+  rfc_sp.drawString(rfc00_06.c_str(), 120 * 0, 50);
+  rfc_sp.drawString(rfc06_12.c_str(), 120 * 1, 50);
   rfc_sp.pushSprite(670, 390);
 }
 
@@ -247,24 +247,25 @@ void drawTemperature(void)
 
 void loop(void)
 {
-  if(M5.BtnP.wasPressed()){
+  if (M5.BtnP.wasPressed()) {
     M5.shutdown(5);
   }
 
-  totalDelay += 60*1000;
-  delay(60*1000);
+  totalDelay += 60 * 1000;
+  delay(60 * 1000);
   drawDate();
 
   // １時間に１回天気情報の更新
-  if(totalDelay >= 60*60*1000) {
-    totalDelay=0;
+  if (totalDelay >= 60 * 60 * 1000) {
+    totalDelay = 0;
 
     wifi_connection.setupWiFi();
-    if(weather_forecast.downloadWeatherForecast()){
+    if (weather_forecast.downloadWeatherForecast()) {
       drawWeather();
       drawRainFallChance();
       drawTemperature();
     }
     wifi_connection.downWiFi();
   }
+  M5.update();
 }

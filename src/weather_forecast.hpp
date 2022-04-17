@@ -18,6 +18,7 @@ class WeatherForecast
 private:
     String endpoint;
     String region;
+    String temperatureRegion;
     bool is_downloaded_weather;
     String max_temperature;
     String min_temperature;

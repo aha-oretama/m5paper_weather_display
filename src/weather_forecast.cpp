@@ -4,14 +4,9 @@
 
 WeatherForecast::WeatherForecast(void)
 {
-    this->endpoint = "https://www.drk7.jp/weather/json/13.js";
+    this->endpoint = "https://www.jma.go.jp/bosai/forecast/data/forecast/130000.json";
     this->region = "東京地方";
-}
-
-String WeatherForecast::createJson(String json_string)
-{
-    json_string.replace("drk7jpweather.callback(","");
-    return json_string.substring(0, json_string.length() - 2);
+    this->temperatureRegion = "東京";
 }
 
 bool WeatherForecast::getWeatherForecast(DynamicJsonDocument &doc)
@@ -23,8 +18,7 @@ bool WeatherForecast::getWeatherForecast(DynamicJsonDocument &doc)
         http.begin(this->endpoint.c_str());
         int http_code = http.GET();
         if (http_code > 0) {
-            String json_string = createJson(http.getString());
-            deserializeJson(doc, json_string);
+            deserializeJson(doc, http.getString());
         } else {
             Serial.println("Error on HTTP request");
             ret = false;
@@ -49,46 +43,81 @@ bool WeatherForecast::downloadWeatherForecast(void)
         return false;
     }
 
-    String today_weather_str = weather_info["pref"]["area"][this->region.c_str()]["info"][0];
-    String tomorrow_weather_str = weather_info["pref"]["area"][this->region.c_str()]["info"][1];
+    // 二日間、週間天気の並び順
+    JsonArray twoDayWeathers = weather_info[0]["timeSeries"].as<JsonArray>();
+    // 天気、降水確率、気温の順
+    JsonArray weatherAreas = twoDayWeathers[0]["areas"].as<JsonArray>();
+    JsonArray chanceOfRainAreas = twoDayWeathers[1]["areas"].as<JsonArray>();
+    JsonArray temperatureAreas = twoDayWeathers[2]["areas"].as<JsonArray>();
 
-    DynamicJsonDocument today_weather_info(20000);
-    deserializeJson(today_weather_info, today_weather_str);
-    DynamicJsonDocument tomorrow_weather_info(20000);
-    deserializeJson(tomorrow_weather_info, tomorrow_weather_str);
+    // 天気
+    for (JsonVariant areas : weatherAreas) {
+        if(areas["area"]["name"] == this->region){
+            // 今日、明日、明後日の順
+            String w = areas["weathers"][0];
+            this->weather = w;
+            String tw = areas["weathers"][1];
+            this->tomorrow_weather = tw;
+        }
+    }
 
-    String w = today_weather_info["weather"];
-    this->weather = w;
+    // 降水確率
+    for (JsonVariant chanceOfRain : chanceOfRainAreas) {
+        if(chanceOfRain["area"]["name"] == this->region){
+            // 今日の0時ではなく、現在時刻から明日の18~24まで
+            // そのため現在時刻によってpops数が変化する
+            int size = chanceOfRain["pops"].size();
+            if (size - 8 >= 0) {
+                String rain = chanceOfRain["pops"][size-8];
+                this->rain_fall_chance_00_06 = rain;
+            }else{
+                this->rain_fall_chance_00_06 = "--";
+            }
+            if (size - 8 + 1 >= 0) {
+                String rain = chanceOfRain["pops"][size-8+1];
+                this->rain_fall_chance_06_12 = rain;
+            }else{
+                this->rain_fall_chance_06_12 = "--";
+            }
+            if (size - 8 + 2 >= 0) {
+                String rain = chanceOfRain["pops"][size-8+2];
+                this->rain_fall_chance_12_18 = rain;
+            }else{
+                this->rain_fall_chance_12_18 = "--";
+            }
+            if (size - 8 + 3 >= 0) {
+                String rain = chanceOfRain["pops"][size-8+3];
+                this->rain_fall_chance_18_24 = rain;
+            }else{
+                this->rain_fall_chance_18_24 = "--";
+            }
+            if (size - 8 + 4 >= 0) {
+                String rain = chanceOfRain["pops"][size-8+4];
+                this->tomorrow_rain_fall_chance_00_06 = rain;
+            }else{
+                this->tomorrow_rain_fall_chance_00_06 = "--";
+            }
+            if (size - 8 + 5 >= 0) {
+                String rain = chanceOfRain["pops"][size-8+5];
+                this->tomorrow_rain_fall_chance_06_12 = rain;
+            }else{
+                this->tomorrow_rain_fall_chance_06_12 = "--";
+            }
+        }
+    }
 
-    String max_temp = today_weather_info["temperature"]["range"][0]["content"];
-    this->max_temperature = max_temp;
-
-    String min_temp = today_weather_info["temperature"]["range"][1]["content"];
-    this->min_temperature = min_temp;
-
-    String rain_0 = today_weather_info["rainfallchance"]["period"][0]["content"];
-    this->rain_fall_chance_00_06 = rain_0;
-
-    String rain_1 = today_weather_info["rainfallchance"]["period"][1]["content"];
-    this->rain_fall_chance_06_12 = rain_1;
-
-    String rain_2 = today_weather_info["rainfallchance"]["period"][2]["content"];
-    this->rain_fall_chance_12_18 = rain_2;
-
-    String rain_3 = today_weather_info["rainfallchance"]["period"][3]["content"];
-    this->rain_fall_chance_18_24 = rain_3;
-
-    String tw = tomorrow_weather_info["weather"];
-    this->tomorrow_weather = tw;
-
-    String t_rain_0 = tomorrow_weather_info["rainfallchance"]["period"][0]["content"];
-    this->tomorrow_rain_fall_chance_00_06 = t_rain_0;
-
-    String t_rain_1 = tomorrow_weather_info["rainfallchance"]["period"][1]["content"];
-    this->tomorrow_rain_fall_chance_06_12 = t_rain_1;
+    // 気温
+    for (JsonVariant temperature : temperatureAreas) {
+        if(temperature["area"]["name"] == this->temperatureRegion){
+           // 今日の朝の最低、日中の最高、明日の朝の最低、日中の最高の順
+           String min_t = temperature["temps"][0];
+           this->min_temperature = min_t;
+           String max_t = temperature["temps"][1];
+           this->max_temperature = max_t;
+        }
+    }
 
     this->is_downloaded_weather = true;
-
     return true;
 }
 
