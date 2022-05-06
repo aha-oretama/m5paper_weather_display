@@ -259,7 +259,9 @@ void loop(void)
   if (totalDelay >= 60 * 60 * 1000) {
     totalDelay = 0;
 
-    wifi_connection.setupWiFi();
+    if (!wifi_connection.setupWiFi()) {
+      ESP.restart();
+    }
     if (weather_forecast.downloadWeatherForecast()) {
       drawWeather();
       drawRainFallChance();
