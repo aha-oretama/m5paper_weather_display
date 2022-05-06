@@ -247,10 +247,6 @@ void drawTemperature(void)
 
 void loop(void)
 {
-  if (M5.BtnP.wasPressed()) {
-    M5.shutdown(5);
-  }
-
   totalDelay += 60 * 1000;
   delay(60 * 1000);
   drawDate();

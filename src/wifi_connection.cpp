@@ -15,6 +15,7 @@ bool WiFiConnection::setupWiFi(void)
     // Check if connected to wifi
     if(WiFi.status() != WL_CONNECTED) {
         Serial.println("No WiFi!");
+        ESP.restart();
         return false;
     }
 
@@ -26,4 +27,3 @@ bool WiFiConnection::downWiFi(void)
 {
     return WiFi.disconnect();
 }
- 
