@@ -20,6 +20,7 @@ private:
     String region;
     String temperatureRegion;
     bool is_downloaded_weather;
+    bool temperature_exists;
     String max_temperature;
     String min_temperature;
     String weather;
@@ -42,6 +43,7 @@ public:
     String getWeather(void){ return weather; };
     String getTomorrowWeather(void){ return tomorrow_weather; };
     int getWeatherEnum(String weather);
+    bool temperatureExists(void){ return temperature_exists; }
     String getMaxTemperature(void){ return max_temperature; };
     String getMinTemperature(void){ return min_temperature; };
     String getRainFallChance00_06(void){ return rain_fall_chance_00_06; };

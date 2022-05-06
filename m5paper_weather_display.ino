@@ -228,6 +228,10 @@ void drawTomorrowRainFallChance(void)
 
 void drawTemperature(void)
 {
+  if(!weather_forecast.temperatureExists()) {
+    return;
+  }
+
   temp_sp.clear(TFT_WHITE);
   temp_sp.setTextColor(TFT_BLACK);
 
