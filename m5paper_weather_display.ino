@@ -226,12 +226,15 @@ void drawTomorrowRainFallChance(void)
   rfc_sp.pushSprite(670, 390);
 }
 
+void updateDrawTemperature(void)
+{
+  if(weather_forecast.temperatureExists()) {
+    drawTemperature();
+  }
+}
+
 void drawTemperature(void)
 {
-  if(!weather_forecast.temperatureExists()) {
-    return;
-  }
-
   temp_sp.clear(TFT_WHITE);
   temp_sp.setTextColor(TFT_BLACK);
 
@@ -254,6 +257,8 @@ void loop(void)
   totalDelay += 60 * 1000;
   delay(60 * 1000);
   drawDate();
+  drawSenseTempAndHumid();
+
 
   // １時間に１回天気情報の更新
   if (totalDelay >= 60 * 60 * 1000) {
@@ -261,11 +266,15 @@ void loop(void)
 
     if (!wifi_connection.setupWiFi()) {
       ESP.restart();
+      return;
     }
     if (weather_forecast.downloadWeatherForecast()) {
       drawWeather();
       drawRainFallChance();
-      drawTemperature();
+      updateDrawTemperature();
+      drawTomorrow();
+      drawTomorrowWeather();
+      drawTomorrowRainFallChance();
     }
     wifi_connection.downWiFi();
   }

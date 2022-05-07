@@ -111,10 +111,14 @@ bool WeatherForecast::downloadWeatherForecast(void)
         if(temperature["area"]["name"] == this->temperatureRegion){
             // 今日の朝の最低、日中の最高、明日の朝の最低、日中の最高の順
             String min_t = temperature["temps"][0];
-            this->min_temperature = min_t;
             String max_t = temperature["temps"][1];
+            if(min_t != max_t) {
+              this->min_temperature = min_t;
+            }else {
+              this->min_temperature = "--";
+            }
             this->max_temperature = max_t;
-            if(temperature["temps"].size() == 4 && (min_t != max_t)) {
+            if(temperature["temps"].size() == 4 && min_t != max_t) {
                 this->temperature_exists = true;
             } else {
                 this->temperature_exists = false;
