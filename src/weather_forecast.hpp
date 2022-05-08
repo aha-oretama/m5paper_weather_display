@@ -19,7 +19,6 @@ private:
     String endpoint;
     String region;
     String temperatureRegion;
-    bool is_downloaded_weather;
     bool temperature_exists;
     String max_temperature;
     String min_temperature;
@@ -39,7 +38,6 @@ public:
     WeatherForecast();
     ~WeatherForecast() = default;
     bool downloadWeatherForecast(void);
-    bool isDownloadedWeatherForecast(void){ return is_downloaded_weather; };
     String getWeather(void){ return weather; };
     String getTomorrowWeather(void){ return tomorrow_weather; };
     int getWeatherEnum(String weather);

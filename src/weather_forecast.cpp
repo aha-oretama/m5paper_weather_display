@@ -30,16 +30,16 @@ bool WeatherForecast::getWeatherForecast(DynamicJsonDocument &doc)
 
 bool WeatherForecast::downloadWeatherForecast(void)
 {
+    this->temperature_exists = false;
+
     Serial.println("downloadWeatherForecast");//debug
     if(!WiFi.isConnected()){
-        this->is_downloaded_weather = false;
         return false;
     }
 
     DynamicJsonDocument weather_info(20000);
 
     if(!getWeatherForecast(weather_info)){
-        this->is_downloaded_weather = false;
         return false;
     }
 
@@ -120,13 +120,10 @@ bool WeatherForecast::downloadWeatherForecast(void)
             this->max_temperature = max_t;
             if(temperature["temps"].size() == 4 && min_t != max_t) {
                 this->temperature_exists = true;
-            } else {
-                this->temperature_exists = false;
             }
         }
     }
 
-    this->is_downloaded_weather = true;
     return true;
 }
 
