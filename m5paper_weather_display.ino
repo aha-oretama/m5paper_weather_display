@@ -91,11 +91,11 @@ void setup(void)
   sense_humi_sp.setFont(&fonts::Font8);
 
   rfc_sp.setColorDepth(4);
-  rfc_sp.createSprite(530, 150);
+  rfc_sp.createSprite(530, 110);
   rfc_sp.setFont(&fonts::lgfxJapanGothic_40);
 
   temp_sp.setColorDepth(4);
-  temp_sp.createSprite(530, 100);
+  temp_sp.createSprite(530, 90);
   temp_sp.setFont(&fonts::lgfxJapanGothic_40);
 
   tomorrow_weather_sp.setColorDepth(4);
@@ -241,8 +241,6 @@ void drawTemperature(void)
   String max_temp = weather_forecast.getMaxTemperature() + "℃";
   String min_temp = weather_forecast.getMinTemperature() + "℃";
 
-  //String max_temp = "23℃";
-  //String min_temp = "9℃";
   temp_sp.setTextSize(0.65);
   temp_sp.drawString("最高", 0, 0);
   temp_sp.drawString("最低", 240, 0);
@@ -259,24 +257,21 @@ void loop(void)
   drawDate();
   drawSenseTempAndHumid();
 
-
-  // １時間に１回天気情報の更新
-  if (totalDelay >= 60 * 60 * 1000) {
+  // １0分に１回天気情報の更新
+  if (totalDelay >= 10 * 60 * 1000) {
     totalDelay = 0;
 
-    if (!wifi_connection.setupWiFi()) {
-      ESP.restart();
-      return;
-    }
-    if (weather_forecast.downloadWeatherForecast()) {
+    if (wifi_connection.setupWiFi() && weather_forecast.downloadWeatherForecast()) {
       drawWeather();
       drawRainFallChance();
       updateDrawTemperature();
       drawTomorrow();
       drawTomorrowWeather();
       drawTomorrowRainFallChance();
+      wifi_connection.downWiFi();
+    }else {
+      ESP.restart();
     }
-    wifi_connection.downWiFi();
   }
   M5.update();
 }
