@@ -118,7 +118,7 @@ bool WeatherForecast::downloadWeatherForecast(void)
               this->min_temperature = "--";
             }
             this->max_temperature = max_t;
-            if(temperature["temps"].size() == 4 && min_t != max_t) {
+            if(temperature["temps"].size() == 2 && min_t != max_t) {
                 this->temperature_exists = true;
             }
         }
